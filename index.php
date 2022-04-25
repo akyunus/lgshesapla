@@ -2,23 +2,49 @@
 $isError = false;
 $sonuc ='';
 
+$dersler = [
+    [
+        "adi" => "Türkçe",
+        "soruSayi" => 20,
+        "dogru" => 0,
+        "formNameDogru" => "turd",
+        "yanlis" => 0,
+        "formNameYanlis" => "tury",
+        "hamPuan" => 0
+    ],
+    [
+        "adi" => "Matematik",
+        "soruSayi" => 20,
+        "dogru" => 0,
+        "formNameDogru" => "matd",
+        "yanlis" => 0,
+        "formNameYanlis" => "maty",
+        "hamPuan" => 0
+    ]
+];
+
 function getFormValue($var = null)
 {
 
     $var = intval($_POST[$var]);
     return $var;
 }
-function getFormValues()
+function getFormValues($dersler)  
 {
-    $turd = getFormValue('turd');
-    $tury = getFormValue('tury');
-    if (($turd>20) || ($turd<2) || ($turd+$tury>20)) {
-        throw new Exception("Türkçe Soru sayılarını kontrol edin!", 1);
+    foreach ($dersler as $key => $ders) {
+        $dersler[$key]['dogru'] = getFormValue($ders['formNameDogru']);
+        $dersler[$key]['yanlis'] = getFormValue($ders['formNameYanlis']);
+        if (
+            ($ders['dogru'] > 20) ||
+            ($ders['dogru'] < 0) ||
+            ($ders['dogru'] + $ders['yanlis'] > 20)
+        ) {
+            throw new Exception($ders['adi'] + ' dersinin Soru sayılarını kontrol edin!', 1);
+        }
     }
-    
 }
 try {
-    getFormValues();
+    getFormValues($dersler);
 } catch (\Throwable $th) {
    $isError = true;
    $errorMessage = $th->getMessage();
