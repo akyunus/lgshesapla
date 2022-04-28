@@ -61,12 +61,12 @@ $dersler = [
 
 function getFormValue($var = null)
 {
-
-    $var = intval($_POST[$var]);
+    $var = array_key_exists($var,$_POST) ? intval($_POST[$var]) : 0;
     return $var;
 }
 function getFormValues()
 {
+    $errors = '';
     global $dersler;
     foreach ($dersler as $key => $ders) {
         $dersler[$key]['dogru'] = getFormValue($ders['formNameDogru']);
@@ -76,9 +76,10 @@ function getFormValues()
             ($dersler[$key]['dogru'] < 0) ||
             ($dersler[$key]['dogru'] + $dersler[$key]['yanlis'] > $ders['soruSayisi'])
         ) {
-            throw new Exception($dersler[$key]['adi'] . ' dersinin Soru sayılarını kontrol edin!', 1);
+            $errors .= $dersler[$key]['adi'] . " dersinin Soru sayılarını kontrol edin!<br>\n";
         }
     }
+    return $errors;
 }
 function calcHamPuan(){
 	global $dersler;
@@ -87,7 +88,8 @@ function calcHamPuan(){
 	}
 }
 try {
-    getFormValues();
+    $errors = getFormValues();
+    if ($errors != '') throw new Exception($errors);
     calcHamPuan();
 } catch (\Throwable $th) {
     $isError = true;
@@ -95,35 +97,62 @@ try {
 }
 
 ?>
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+* {
+  box-sizing: border-box;
+}
 
+/* Create three equal columns that floats next to each other */
+.column {
+  float: left;
+  width: 31%;
+  padding: 10px;
+  margin: 1%;
+  
+}
+
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+</style>
+</head>
+<body>
 <form method="post" action="#" name="lgs_form" id="lgs_form">
-    <table>
-        <thead>
-            <tr style="color:#FAFAFA;background-color:#8A604F">
-                <th>Ders</th>
-                <th>Doğru</th>
-                <th>Yanlış</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($dersler as $ders) : ?>
-                <tr>
-                    <td><b><?= $ders['adi'] ?> (<?= $ders['soruSayisi'] ?>)</b></td>
-                    <td><input name="<?= $ders['formNameDogru'] ?>" type="number" class="form-control" value="<?= $ders['dogru'] ?>" max="<?= $ders['soruSayisi'] ?>" min="0" onkeypress="if (!window.__cfRLUnblockHandlers) return false; return onlyIntNumbers();"></td>
-                    <td><input name="<?= $ders['formNameYanlis'] ?>" type="number" class="form-control" value="<?= $ders['yanlis'] ?>" max="<?= $ders['soruSayisi'] ?>" min="0" onkeypress="if (!window.__cfRLUnblockHandlers) return false; return onlyIntNumbers();"></td>
-                </tr>
-            <?php endforeach; ?>
+<div class="row" >
+  <div class="column" style="color:#FAFAFA;background-color:#8A604F">Ders</div>
+  <div class="column" style="color:#FAFAFA;background-color:#8A604F">Doğru</div>
+  <div class="column" style="color:#FAFAFA;background-color:#8A604F">Yanlış</div>
+</div>
+<?php foreach ($dersler as $ders) : ?>
+    <div class="row" >
+                    <div class="column"><b><?= $ders['adi'] ?> (<?= $ders['soruSayisi'] ?>)</b></div>
+                    <div class="column"><input name="<?= $ders['formNameDogru'] ?>" type="number" class="form-control" value="<?= $ders['dogru'] ?>" max="<?= $ders['soruSayisi'] ?>" min="0" onkeypress="if (!window.__cfRLUnblockHandlers) return false; return onlyIntNumbers();"></div>
+                    <div class="column"><input name="<?= $ders['formNameYanlis'] ?>" type="number" class="form-control" value="<?= $ders['yanlis'] ?>" max="<?= $ders['soruSayisi'] ?>" min="0" onkeypress="if (!window.__cfRLUnblockHandlers) return false; return onlyIntNumbers();"></div>
+    </div>
+<?php endforeach; ?>
 
-        </tbody>
-    </table>
+
+  
+    <div class="row">
+  <div class="column"></div>
+  <div class="column"> <input aria-label="hesapla" type="submit" name="hsp_hesapla" value="LGS PUANIMI HESAPLA" class="btn btn-success mr-2 text-center" style="width:99%;color:#FFFFFF;background-color:#1E623F"></div>
+  <div class="column"><input aria-label="temizle" type="button" name="reset hsp_temizle" value="Temizle" class="btn btn-info" onclick="if (!window.__cfRLUnblockHandlers) return false; teogTemizle()" style="width:99%; background-color:#7A0000; float:right;color:#FFFFFF"></div>
+</div>
     <div style="margin-bottom:15px;">
-        <input aria-label="hesapla" type="submit" name="hsp_hesapla" value="LGS PUANIMI HESAPLA" class="btn btn-success mr-2 text-center" style="width:65%;color:#FFFFFF;background-color:#1E623F">
-        <input aria-label="temizle" type="button" name="reset hsp_temizle" value="Temizle" class="btn btn-info" onclick="if (!window.__cfRLUnblockHandlers) return false; teogTemizle()" style="width:30%; background-color:#7A0000; float:right;color:#FFFFFF">
+       
+        
     </div>
 </form>
 <?php if ($isError) { ?>
     <h3>Hata</h3>
     <p><?= $errorMessage ?></p>
 <?php } else if ($sonuc != '') { ?>
-    <h3>Sonuç</h3>
+    <h3>Sonuçlar</h3>
 <?php } ?>
