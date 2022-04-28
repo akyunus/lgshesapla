@@ -80,8 +80,15 @@ function getFormValues()
         }
     }
 }
+function calcHamPuan(){
+	global $dersler;
+	foreach ($dersler as $i=> $ders){
+		$dersler[$i]['hamPuan'] = $ders['dogru'] - ($ders['yanlis'] / 3);
+	}
+}
 try {
     getFormValues();
+    calcHamPuan();
 } catch (\Throwable $th) {
     $isError = true;
     $errorMessage = $th->getMessage();
