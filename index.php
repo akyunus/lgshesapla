@@ -1,16 +1,68 @@
 <?php
+
+declare(strict_types=1);
 $isError = false;
 $sonuc = '';
+class DersVerisi
+{
+    public string $adi;
+    public string $formNameDogru;
+    public string $formNameYanlis;
+    public int $soruSayisi;
+    public int $dogruSayisi = 0;
+    public int $yanlisSayisi = 0;
+    public float $agirlikKatsayisi;
+    public float $ortHamPuan;
+    public float $ortStandartSapma;
 
+    public function __construct(
+        $adi,
+        $formNameDogru,
+        $formNameYanlis,
+        $soruSayisi,
+        $agirlikKatsayisi,
+        $ortHamPuan,
+        $ortStandartSapma
+    ) {
+        $this->adi = $adi;
+        $this->formNameDogru = $formNameDogru;
+        $this->formNameYanlis = $formNameYanlis;
+        $this->soruSayisi = $soruSayisi;
+        $this->agirlikKatsayisi = $agirlikKatsayisi;
+        $this->ortHamPuan = $ortHamPuan;
+        $this->ortStandartSapma = $ortStandartSapma;
+    }
+
+    public function setDogruSayisi(int $value)
+    {
+        $this->dogruSayisi = $value;
+    }
+
+    public function setYanlisSayisi(int $value)
+    {
+        $this->yanlisSayisi = $value;
+    }
+
+    public function hamPuan(): float
+    {
+        return $this->dogruSayisi - ($this->yanlisSayisi / 3);
+    }
+}
+
+$turkce = new DersVerisi("Türkçe", 'turd', 'tury', 20, 4, 9.41, 4, 79);
+$matematik = new DersVerisi("Matematik", 'matd', 'maty', 20, 4, 4.2, 3, 31);
 $dersler = [
-    [
+    $turkce,
+    $matematik
+    /*[
         "adi" => "Türkçe",
         "soruSayisi" => 20,
         "dogru" => 0,
         "formNameDogru" => "turd",
         "yanlis" => 0,
         "formNameYanlis" => "tury",
-        "hamPuan" => 0
+        "hamPuan" => 0,
+        "agirlikKatsayisi" => 4
     ],
     [
         "adi" => "Matematik",
@@ -56,7 +108,7 @@ $dersler = [
         "yanlis" => 0,
         "formNameYanlis" => "dily",
         "hamPuan" => 0
-    ]
+    ]*/
 ];
 
 function getFormValue($var = null)
@@ -69,18 +121,29 @@ function getFormValues()
 {
     global $dersler;
     foreach ($dersler as $key => $ders) {
-        $dersler[$key]['dogru'] = getFormValue($ders['formNameDogru']);
-        $dersler[$key]['yanlis'] = getFormValue($ders['formNameYanlis']);
+        $dersler[$key]->setDogruSayisi(getFormValue($ders->formNameDogru));
+        $dersler[$key]->setYanlisSayisi(getFormValue($ders->formNameYanlis));
         if (
-            ($dersler[$key]['dogru'] > $ders['soruSayisi']) ||
-            ($dersler[$key]['dogru'] < 0) ||
-            ($dersler[$key]['dogru'] + $dersler[$key]['yanlis'] > $ders['soruSayisi'])
+            ($dersler[$key]->dogruSayisi > $ders->soruSayisi) ||
+            ($dersler[$key]->dogruSayisi < 0) ||
+            ($dersler[$key]->dogruSayisi + $dersler[$key]->yanlisSayisi > $ders->soruSayisi)
         ) {
-            throw new Exception($dersler[$key]['adi'] . ' dersinin Soru sayılarını kontrol edin!', 1);
+            throw new Exception($dersler[$key]->adi . ' dersinin Soru sayılarını kontrol edin!', 1);
         }
     }
 }
+function isFormSubmitted()
+{
+    global $sonuc;
+    try {
+        $var = intval($_POST['submit_hesapla']);
+    } catch (\Throwable $th) {
+        //throw $th;
+    }
+    $sonuc = 'Değerleri girin ve hesapla butonuna basın';
+}
 try {
+
     getFormValues();
 } catch (\Throwable $th) {
     $isError = true;
@@ -90,27 +153,30 @@ try {
 ?>
 
 <form method="post" action="#" name="lgs_form" id="lgs_form">
-    <table>
-        <thead>
-            <tr style="color:#FAFAFA;background-color:#8A604F">
-                <th>Ders</th>
-                <th>Doğru</th>
-                <th>Yanlış</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($dersler as $ders) : ?>
-                <tr>
-                    <td><b><?= $ders['adi'] ?> (<?= $ders['soruSayisi'] ?>)</b></td>
-                    <td><input name="<?= $ders['formNameDogru'] ?>" type="number" class="form-control" value="<?= $ders['dogru'] ?>" max="<?= $ders['soruSayisi'] ?>" min="0" onkeypress="if (!window.__cfRLUnblockHandlers) return false; return onlyIntNumbers();"></td>
-                    <td><input name="<?= $ders['formNameYanlis'] ?>" type="number" class="form-control" value="<?= $ders['yanlis'] ?>" max="<?= $ders['soruSayisi'] ?>" min="0" onkeypress="if (!window.__cfRLUnblockHandlers) return false; return onlyIntNumbers();"></td>
+    <div style="overflow-x:auto;">
+        <table>
+            <thead>
+                <tr style="color:#FAFAFA;background-color:#8A604F">
+                    <th>Ders</th>
+                    <th>Doğru</th>
+                    <th>Yanlış</th>
                 </tr>
-            <?php endforeach; ?>
+            </thead>
+            <tbody>
+                <?php foreach ($dersler as $ders) : ?>
+                    <tr>
+                        <td><b><?= $ders->adi ?> (<?= $ders->soruSayisi ?>)</b></td>
+                        <td><input name="<?= $ders->formNameDogru ?>" type="number" class="form-control" value="<?= $ders->dogruSayisi ?>" max="<?= $ders->soruSayisi ?>" min="0" onkeypress="if (!window.__cfRLUnblockHandlers) return false; return onlyIntNumbers();"></td>
+                        <td><input name="<?= $ders->formNameYanlis ?>" type="number" class="form-control" value="<?= $ders->yanlisSayisi ?>" max="<?= $ders->soruSayisi ?>" min="0" onkeypress="if (!window.__cfRLUnblockHandlers) return false; return onlyIntNumbers();"></td>
+                    </tr>
+                <?php endforeach; ?>
 
-        </tbody>
-    </table>
+            </tbody>
+
+        </table>
+    </div>
     <div style="margin-bottom:15px;">
-        <input aria-label="hesapla" type="submit" name="hsp_hesapla" value="LGS PUANIMI HESAPLA" class="btn btn-success mr-2 text-center" style="width:65%;color:#FFFFFF;background-color:#1E623F">
+        <input aria-label="hesapla" type="submit" name="submit_hesapla" value="LGS PUANIMI HESAPLA" class="btn btn-success mr-2 text-center" style="width:65%;color:#FFFFFF;background-color:#1E623F">
         <input aria-label="temizle" type="button" name="reset hsp_temizle" value="Temizle" class="btn btn-info" onclick="if (!window.__cfRLUnblockHandlers) return false; teogTemizle()" style="width:30%; background-color:#7A0000; float:right;color:#FFFFFF">
     </div>
 </form>
