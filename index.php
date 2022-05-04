@@ -3,6 +3,9 @@
 declare(strict_types=1);
 $isError = false;
 $sonuc = '';
+$minTASP = 68;
+$maxTASP = 308;
+
 class DersVerisi
 {
     public string $adi;
@@ -47,13 +50,36 @@ class DersVerisi
     {
         return $this->dogruSayisi - ($this->yanlisSayisi / 3);
     }
+
+    public function standartPuan(): float
+    {
+        return 10 * (($this->hamPuan() - $this->ortHamPuan) / $this->ortStandartSapma) + 50;
+    }
+
+    public function agirlikliStandartPuan(): float
+    {
+        return $this->agirlikKatsayisi * $this->standartPuan();
+    }
+
+    public function sonPuan(): float
+    {
+        return $this->agirlikliStandartPuan() / $this->ortStandartSapma;
+    }
 }
 
-$turkce = new DersVerisi("Türkçe", 'turd', 'tury', 20, 4, 9.41, 4, 79);
-$matematik = new DersVerisi("Matematik", 'matd', 'maty', 20, 4, 4.2, 3, 31);
+$turkce = new DersVerisi("Türkçe",          'turd', 'tury', 20, 4, 9.41, 4.79);
+$inkilap = new DersVerisi("İnkılap", "inkd", 'inky', 10, 1, 5.23, 2.87);
+$din = new DersVerisi('Din Kültürü', 'dind', 'diny', 10, 1, 6.35, 2.59);
+$dil = new DersVerisi('Yabancı Dil', 'dild', 'dily', 10, 1, 4.93, 3.34);
+$matematik = new DersVerisi("Matematik",    'matd', 'maty', 20, 4, 4.2,  3.31);
+$fen = new DersVerisi('Fen Bilimleri', 'fend', 'feny', 20, 4, 8.04, 4.82);
 $dersler = [
     $turkce,
-    $matematik
+    $inkilap,
+    $din,
+    $dil,
+    $matematik,
+    $fen
     /*[
         "adi" => "Türkçe",
         "soruSayisi" => 20,
@@ -139,6 +165,17 @@ function isFormSubmitted()
     return isset($_POST['hsp_hesapla']);
 }
 
+function toplamPuan($dersVerileri, $minTASP, $maxTASP): float
+{
+    $toplamSonPuan = 0;
+
+    foreach ($dersVerileri as $key => $ders) {
+        $toplamSonPuan += $ders->sonPuan();
+    }
+    $toplamPuan = (($toplamSonPuan - $minTASP) * 400) / ($maxTASP - $minTASP) + 100;
+    return $toplamPuan;
+}
+
 try {
     if (isFormSubmitted()) {
         $errors = getFormValues();
@@ -222,7 +259,9 @@ try {
         <h3>Sonuçlar</h3>
         <?php foreach ($dersler as $ders) : ?>
             <p>
-                <b><?= $ders->adi ?> </b> Ham Puan : <?= $ders->hamPuan() ?>
+                <?= $ders->adi ?> Ham Puan : <?= number_format($ders->hamPuan(), 2) ?>
             </p>
         <?php endforeach; ?>
+        <hr>
+        <p><b>Toplam Puan: <?= toplamPuan($dersler, $minTASP, $maxTASP) ?></b></p>
     <?php } ?>
