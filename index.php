@@ -67,18 +67,18 @@ class DersVerisi
     }
 }
 
-$turkce = new DersVerisi("Türkçe",          'turd', 'tury', 20, 4, 9.41, 4.79);
-$inkilap = new DersVerisi("İnkılap", "inkd", 'inky', 10, 1, 5.23, 2.87);
+$tur = new DersVerisi('Türkçe',  'turd', 'tury', 20, 4, 9.41, 4.79);
+$ink = new DersVerisi('İnkılap', 'inkd', 'inky', 10, 1, 5.23, 2.87);
 $din = new DersVerisi('Din Kültürü', 'dind', 'diny', 10, 1, 6.35, 2.59);
 $dil = new DersVerisi('Yabancı Dil', 'dild', 'dily', 10, 1, 4.93, 3.34);
-$matematik = new DersVerisi("Matematik",    'matd', 'maty', 20, 4, 4.2,  3.31);
+$mat = new DersVerisi('Matematik',    'matd', 'maty', 20, 4, 4.2,  3.31);
 $fen = new DersVerisi('Fen Bilimleri', 'fend', 'feny', 20, 4, 8.04, 4.82);
 $dersler = [
-    $turkce,
-    $inkilap,
+    $tur,
+    $ink,
     $din,
     $dil,
-    $matematik,
+    $mat,
     $fen
     /*[
         "adi" => "Türkçe",
@@ -197,22 +197,30 @@ try {
     <style>
         * {
             box-sizing: border-box;
+
+            font-size: clamp(1rem, 2vw, 2rem);
+
         }
 
-        /* Create three equal columns that floats next to each other */
         .column {
             float: left;
             width: 31%;
-            padding: 10px;
-            margin: 1%;
+            padding: 5px;
+            vertical-align: middle;
+            text-align: center;
+            /*margin: 1%;*/
 
         }
 
-        /* Clear floats after the columns */
         .row:after {
             content: "";
             display: table;
             clear: both;
+            align-content: center;
+        }
+
+        .form-control {
+            font-size: clamp(1.5rem, 6vw, 3rem);
         }
     </style>
 </head>
@@ -220,9 +228,9 @@ try {
 <body>
     <form method="post" action="#" name="lgs_form" id="lgs_form">
         <div class="row">
-            <div class="column" style="color:#FAFAFA;background-color:#8A604F">Ders</div>
-            <div class="column" style="color:#FAFAFA;background-color:#8A604F">Doğru</div>
-            <div class="column" style="color:#FAFAFA;background-color:#8A604F">Yanlış</div>
+            <div class="column" style="color:#FAFAFA;background-color:#8A303F">Ders</div>
+            <div class="column" style="color:#FAFAFA;background-color:#8A303F">Doğru Sayısı</div>
+            <div class="column" style="color:#FAFAFA;background-color:#8A303F">Yanlış Sayısı</div>
         </div>
         <?php foreach ($dersler as $ders) : ?>
             <div class="row">
@@ -241,9 +249,9 @@ try {
 
 
         <div class="row">
-            <div class="column"></div>
-            <div class="column"> <input aria-label="hesapla" type="submit" name="hsp_hesapla" value="LGS PUANIMI HESAPLA" class="btn btn-success mr-2 text-center" style="width:99%;color:#FFFFFF;background-color:#1E623F"></div>
-            <div class="column"><input aria-label="temizle" type="button" name="reset hsp_temizle" value="Temizle" class="btn btn-info" onclick="if (!window.__cfRLUnblockHandlers) return false; teogTemizle()" style="width:99%; background-color:#7A0000; float:right;color:#FFFFFF"></div>
+
+            <div class="column"> <input aria-label="hesapla" type="submit" name="hsp_hesapla" value="HESAPLA" style="width:99%;color:#FFFFFF;background-color:#8A303F"></div>
+
         </div>
         <div style="margin-bottom:15px;">
 
@@ -263,5 +271,5 @@ try {
             </p>
         <?php endforeach; ?>
         <hr>
-        <p><b>Toplam Puan: <?= toplamPuan($dersler, $minTASP, $maxTASP) ?></b></p>
+        <p><b>Toplam Puan: <?= number_format(toplamPuan($dersler, $minTASP, $maxTASP), 4) ?></b></p>
     <?php } ?>
