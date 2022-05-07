@@ -108,10 +108,9 @@ function toplamPuan($dersVerileri, $minTASP, $maxTASP): float
 
 function lgs_hesapla_tablo_ciz($content)
 {
-    $keyword = '[LGS_HESAPLA]';
+    
     $output = '';
-    // Only do this when a single post is displayed
-    if (is_single()  && str_contains($content, $keyword)) {
+    
         $isError = false;
         $sonuc = '';
         $minTASP = 68;
@@ -233,8 +232,8 @@ function lgs_hesapla_tablo_ciz($content)
         }
 
 
-        return str_replace('[LGS_HESAPLA]', $output, $content);
-    }
+        return $output;
+    
 }
 
 function enqueue_related_pages_scripts_and_styles()
@@ -243,4 +242,4 @@ function enqueue_related_pages_scripts_and_styles()
 }
 
 add_action('wp_enqueue_scripts', 'enqueue_related_pages_scripts_and_styles');
-add_filter('the_content', 'lgs_hesapla_tablo_ciz');
+add_shortcode( 'LGS_HESAPLA', 'lgs_hesapla_tablo_ciz' );
